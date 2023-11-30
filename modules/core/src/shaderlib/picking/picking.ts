@@ -36,5 +36,13 @@ uniform bool picking_uAttribute;
     `
     }
   },
-  ...picking
+  ...picking,
+  getUniforms(opts: PickingModuleSettings = {}) {
+    return picking.getUniforms!({
+      isActive: opts.pickingActive,
+      isAttribute: opts.pickingAttribute,
+      highlightColor: opts.pickingSelectedColor ? opts.pickingSelectedColor : undefined,
+      highlightedObjectColor: opts.pickingHighlightColor
+    });
+  }
 } as ShaderModule<PickingModuleSettings>;

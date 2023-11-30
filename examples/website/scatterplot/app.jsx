@@ -32,6 +32,13 @@ export default function App({
     new ScatterplotLayer({
       id: 'scatter-plot',
       data,
+      pickable: true,
+      onHover: info => {
+        if (info.object) {
+          console.log(info.object);
+        }
+      },
+      autoHighlight: true,
       radiusScale: radius,
       radiusMinPixels: 0.25,
       getPosition: d => [d[0], d[1], 0],

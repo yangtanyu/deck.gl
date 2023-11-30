@@ -22,6 +22,7 @@ import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
+import {picking as _picking} from '@luma.gl/shadertools';
 
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
@@ -36,6 +37,7 @@ import type {
   Color,
   DefaultProps
 } from '@deck.gl/core';
+import {UniformStore} from '@luma.gl/core';
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -183,6 +185,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
 
   state!: {
     model?: Model;
+    uniformStore?: UniformStore<{picking: any}>;
   };
 
   getShaders() {
@@ -235,6 +238,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     if (params.changeFlags.extensionsChanged) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
+      this.state.uniformStore = new UniformStore<{picking: any}>({picking});
       this.getAttributeManager()!.invalidateAll();
     }
   }
@@ -271,6 +275,18 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMinPixels,
       lineWidthMaxPixels
     });
+
+    // HACK
+    const uniformStore = this.state.uniformStore!;
+    const {isActive, isAttribute, highlightColor, highlightedObjectColor} = model.uniforms;
+    const pickingUniforms = {isActive, isAttribute, highlightColor, highlightedObjectColor};
+    uniformStore!.setUniforms({
+      picking: pickingUniforms
+    });
+    model.setBindings({
+      picking: uniformStore!.getManagedUniformBuffer(this.context.device, 'picking')
+    });
+
     model.draw(this.context.renderPass);
   }
 
