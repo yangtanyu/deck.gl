@@ -41,6 +41,7 @@ uniform bool picking_uAttribute;
     return picking.getUniforms!({
       isActive: opts.pickingActive,
       isAttribute: opts.pickingAttribute,
+      useNormalizedColors: false,
       highlightColor: opts.pickingSelectedColor ? opts.pickingSelectedColor : undefined,
       highlightedObjectColor: opts.pickingHighlightColor
     });
