@@ -42,8 +42,9 @@ uniform bool picking_uAttribute;
       isActive: opts.pickingActive,
       isAttribute: opts.pickingAttribute,
       useNormalizedColors: false,
-      highlightColor: opts.pickingSelectedColor ? opts.pickingSelectedColor : undefined,
-      highlightedObjectColor: opts.pickingHighlightColor
+      highlightColor: opts.pickingHighlightColor,
+      // @ts-ignore
+      highlightedObjectColor: opts.pickingSelectedColor
     });
   }
 } as ShaderModule<PickingModuleSettings>;
