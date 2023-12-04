@@ -285,7 +285,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   }
 
   protected _getModel() {
-    const {getManagedUniformBuffer} = this.state.uniformStore;
+    const {uniformStore} = this.state;
 
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
@@ -293,7 +293,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
-      bindings: {picking: getManagedUniformBuffer(this.context.device, 'picking')},
+      bindings: {picking: uniformStore.getManagedUniformBuffer(this.context.device, 'picking')},
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {
