@@ -33,11 +33,7 @@ export default function App({
       id: 'scatter-plot',
       data,
       pickable: true,
-      onHover: info => {
-        if (info.object) {
-          console.log(info.object);
-        }
-      },
+      onHover: info => console.log(info?.object);
       autoHighlight: true,
       radiusScale: radius,
       radiusMinPixels: 0.25,
