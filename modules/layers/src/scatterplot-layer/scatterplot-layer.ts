@@ -236,9 +236,10 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
+      this.state.uniformStore?.destroy();
+      this.state.uniformStore = new UniformStore<{picking: any}>({picking});
       this.state.model?.destroy();
       this.state.model = this._getModel();
-      this.state.uniformStore = new UniformStore<{picking: any}>({picking});
       this.getAttributeManager()!.invalidateAll();
     }
   }
@@ -280,23 +281,21 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     const uniformStore = this.state.uniformStore!;
     const {isActive, isAttribute, highlightColor, highlightedObjectColor} = model.uniforms;
     const pickingUniforms = {isActive, isAttribute, highlightColor, highlightedObjectColor};
-    uniformStore!.setUniforms({
-      picking: pickingUniforms
-    });
-    model.setBindings({
-      picking: uniformStore!.getManagedUniformBuffer(this.context.device, 'picking')
-    });
+    uniformStore!.setUniforms({picking: pickingUniforms});
 
     model.draw(this.context.renderPass);
   }
 
   protected _getModel() {
+    const uniformStore = this.state.uniformStore!;
+
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bindings: {picking: uniformStore!.getManagedUniformBuffer(this.context.device, 'picking')},
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {
