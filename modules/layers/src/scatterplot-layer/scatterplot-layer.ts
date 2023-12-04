@@ -185,7 +185,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
 
   state!: {
     model?: Model;
-    uniformStore?: UniformStore<{picking: NonNullable<typeof picking.uniforms>}>;
+    uniformStore: UniformStore<{picking: NonNullable<typeof picking.uniforms>}>;
   };
 
   getShaders() {
@@ -230,14 +230,13 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         defaultValue: 1
       }
     });
+    this.state.uniformStore = new UniformStore<{picking: any}>({picking});
   }
 
   updateState(params: UpdateParameters<this>) {
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
-      this.state.uniformStore?.destroy();
-      this.state.uniformStore = new UniformStore<{picking: any}>({picking});
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
@@ -278,16 +277,15 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     });
 
     // HACK
-    const uniformStore = this.state.uniformStore!;
     const {isActive, isAttribute, highlightColor, highlightedObjectColor} = model.uniforms;
     const pickingUniforms = {isActive, isAttribute, highlightColor, highlightedObjectColor};
-    uniformStore!.setUniforms({picking: pickingUniforms});
+    this.state.uniformStore.setUniforms({picking: pickingUniforms});
 
     model.draw(this.context.renderPass);
   }
 
   protected _getModel() {
-    const uniformStore = this.state.uniformStore!;
+    const {getManagedUniformBuffer} = this.state.uniformStore;
 
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
@@ -295,7 +293,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
-      bindings: {picking: uniformStore!.getManagedUniformBuffer(this.context.device, 'picking')},
+      bindings: {picking: getManagedUniformBuffer(this.context.device, 'picking')},
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {
