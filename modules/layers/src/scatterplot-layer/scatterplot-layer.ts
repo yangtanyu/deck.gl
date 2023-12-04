@@ -185,7 +185,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
 
   state!: {
     model?: Model;
-    uniformStore?: UniformStore<{picking: any}>;
+    uniformStore?: UniformStore<{picking: NonNullable<typeof picking.uniforms>}>;
   };
 
   getShaders() {
