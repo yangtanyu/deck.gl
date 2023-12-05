@@ -1,5 +1,4 @@
 import {picking} from '@luma.gl/shadertools';
-import type {ShaderModule} from '../../types/types';
 
 type PickingModuleSettings = {
   /** Set to a picking color to visually highlight that item */
@@ -37,13 +36,14 @@ uniform bool picking_uAttribute;
     }
   },
   ...picking,
-  getUniforms(opts: PickingModuleSettings = {}) {
+  getUniforms(opts: PickingModuleSettings = {}): typeof picking.uniforms {
     return picking.getUniforms!({
       isActive: opts.pickingActive,
       isAttribute: opts.pickingAttribute,
-      useFloatColors: false,
+      // TODO why true?
+      useFloatColors: true,
       highlightColor: opts.pickingHighlightColor,
       highlightedObjectColor: opts.pickingSelectedColor
     });
   }
-} as ShaderModule<PickingModuleSettings>;
+};

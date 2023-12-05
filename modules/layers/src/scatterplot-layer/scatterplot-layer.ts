@@ -22,7 +22,6 @@ import {Layer, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 import {GL} from '@luma.gl/constants';
-import {picking as _picking} from '@luma.gl/shadertools';
 
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
@@ -185,8 +184,12 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
 
   state!: {
     model?: Model;
-    uniformStore: UniformStore<{picking: NonNullable<typeof picking.uniforms>}>;
   };
+
+  // TODO why NonNullable? Why is `typeof picking.uniforms` `PickingUniforms` in luma
+  // but `PickingUniforms | undefined` here?
+  // uniformStore = new UniformStore<{picking: typeof picking.uniforms}>({picking});
+  uniformStore = new UniformStore<{picking: NonNullable<typeof picking.uniforms>}>({picking});
 
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]});
@@ -230,7 +233,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         defaultValue: 1
       }
     });
-    this.state.uniformStore = new UniformStore<{picking: any}>({picking});
   }
 
   updateState(params: UpdateParameters<this>) {
@@ -276,16 +278,31 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMaxPixels
     });
 
-    // HACK
-    const {isActive, isAttribute, highlightColor, highlightedObjectColor} = model.uniforms;
-    const pickingUniforms = {isActive, isAttribute, highlightColor, highlightedObjectColor};
-    this.state.uniformStore.setUniforms({picking: pickingUniforms});
+    const {
+      isActive,
+      isAttribute,
+      isHighlightActive,
+      highlightColor,
+      highlightedObjectColor,
+      useFloatColors
+    } = model.uniforms;
+    this.uniformStore.setUniforms({
+      picking: {
+        wrong: 123,
+        isActive,
+        isAttribute,
+        isHighlightActive,
+        highlightColor,
+        highlightedObjectColor,
+        useFloatColors
+      } as typeof picking.uniforms
+    });
 
     model.draw(this.context.renderPass);
   }
 
   protected _getModel() {
-    const {uniformStore} = this.state;
+    const {uniformStore} = this;
 
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
