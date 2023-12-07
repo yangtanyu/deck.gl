@@ -186,10 +186,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     model?: Model;
   };
 
-  // TODO why NonNullable? Why is `typeof picking.uniforms` `PickingUniforms` in luma
-  // but `PickingUniforms | undefined` here?
-  // uniformStore = new UniformStore<{picking: typeof picking.uniforms}>({picking});
-  uniformStore = new UniformStore<{picking: NonNullable<typeof picking.uniforms>}>({picking});
+  uniformStore = new UniformStore({picking});
 
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]});
@@ -288,7 +285,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     } = model.uniforms;
     this.uniformStore.setUniforms({
       picking: {
-        wrong: 123,
         isActive,
         isAttribute,
         isHighlightActive,

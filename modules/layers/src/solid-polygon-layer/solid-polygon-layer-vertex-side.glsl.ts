@@ -21,6 +21,7 @@
 import main from './solid-polygon-layer-vertex-main.glsl';
 
 export default `\
+#version 300 es
 #define SHADER_NAME solid-polygon-layer-vertex-shader-side
 
 attribute vec2 positions;

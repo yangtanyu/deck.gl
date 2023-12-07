@@ -20,7 +20,10 @@
 
 import {Layer, project32, gouraudLighting, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
+import {UniformStore} from '@luma.gl/core';
 import {GL} from '@luma.gl/constants';
+
+import {updatePickingUniformBindings} from '../utils';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -42,6 +45,7 @@ import type {
   DefaultProps
 } from '@deck.gl/core';
 import type {PolygonGeometry} from './polygon';
+
 
 type _SolidPolygonLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
@@ -147,6 +151,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     numInstances: number;
     polygonTesselator: PolygonTesselator;
   };
+
+  uniformStore = new UniformStore({picking});
 
   getShaders(type) {
     return super.getShaders({
@@ -332,18 +338,23 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     if (wireframeModel && wireframe) {
       wireframeModel.setInstanceCount(polygonTesselator.instanceCount - 1);
       wireframeModel.setUniforms(renderUniforms);
+
+      // not sure if we need picking for wireframe, as for now just be safe
+      updatePickingUniformBindings(wireframeModel, this.uniformStore);
       wireframeModel.draw(this.context.renderPass);
     }
 
     if (sideModel && filled) {
       sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
       sideModel.setUniforms(renderUniforms);
+      updatePickingUniformBindings(sideModel, this.uniformStore);
       sideModel.draw(this.context.renderPass);
     }
 
     if (topModel && filled) {
       topModel.setVertexCount(polygonTesselator.vertexCount);
       topModel.setUniforms(renderUniforms);
+      updatePickingUniformBindings(topModel, this.uniformStore);
       topModel.draw(this.context.renderPass);
     }
   }
@@ -429,6 +440,9 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           isWireframe: false
         },
         bufferLayout,
+        bindings: {
+          picking: this.uniformStore.getManagedUniformBuffer(this.context.device, 'picking')
+        },
         isIndexed: true,
         userData: {
           excludeAttributes: {instanceVertexValid: true}
@@ -440,6 +454,9 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         ...this.getShaders('side'),
         id: `${id}-side`,
         bufferLayout,
+        bindings: {
+          picking: this.uniformStore.getManagedUniformBuffer(this.context.device, 'picking')
+        },
         uniforms: {
           isWireframe: false
         },
@@ -463,6 +480,9 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         ...this.getShaders('side'),
         id: `${id}-wireframe`,
         bufferLayout,
+        bindings: {
+          picking: this.uniformStore.getManagedUniformBuffer(this.context.device, 'picking')
+        },
         uniforms: {
           isWireframe: true
         },

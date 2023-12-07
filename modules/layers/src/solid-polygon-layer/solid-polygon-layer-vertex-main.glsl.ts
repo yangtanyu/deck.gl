@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 export default `\
-
 uniform bool extruded;
 uniform bool isWireframe;
 uniform float elevationScale;
