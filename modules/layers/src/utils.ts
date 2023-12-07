@@ -1,6 +1,11 @@
 // Assume data array is sorted by <accessor>
 // Replaces the specified range with a new subarray
 // Mutates the data array
+
+import {UniformStore} from '@luma.gl/core';
+import {Model} from '@luma.gl/engine';
+import {picking} from '@luma.gl/shadertools';
+
 // Returns {startRow, endRow} of the inserted items
 export function replaceInRange({
   data,
@@ -48,4 +53,28 @@ export function replaceInRange({
     startRow: replaceStart,
     endRow: replaceStart + replace.length
   };
+}
+
+export function updatePickingUniformBindings(
+  model: Model,
+  uniformStore: UniformStore<{picking: NonNullable<typeof picking.uniforms>}>
+) {
+  const {
+    isActive,
+    isAttribute,
+    isHighlightActive,
+    highlightColor,
+    highlightedObjectColor,
+    useFloatColors
+  } = model.uniforms;
+  uniformStore.setUniforms({
+    picking: {
+      isActive,
+      isAttribute,
+      isHighlightActive,
+      highlightColor,
+      highlightedObjectColor,
+      useFloatColors
+    } as typeof picking.uniforms
+  });
 }

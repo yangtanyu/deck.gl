@@ -40,6 +40,8 @@ import {GL} from '@luma.gl/constants';
 
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
+import {UniformStore} from '@luma.gl/core';
+import {updatePickingUniformBindings} from '../utils';
 
 const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
 
@@ -157,6 +159,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     model?: Model;
   };
 
+  uniformStore = new UniformStore({picking});
+
   getBounds(): [number[], number[]] | null {
     return this.getAttributeManager()?.getBounds([
       'instanceSourcePositions',
@@ -232,7 +236,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
 
   updateState(opts: UpdateParameters<this>): void {
     super.updateState(opts);
-    const {props, oldProps, changeFlags} = opts;
+    const {props, oldProps} = opts;
     // Re-generate model if geometry changed
     if (opts.changeFlags.extensionsChanged || props.numSegments !== oldProps.numSegments) {
       this.state.model?.destroy();
@@ -255,11 +259,13 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       widthMaxPixels,
       useShortestPath: wrapLongitude
     });
+    updatePickingUniformBindings(model, this.uniformStore);
     model.draw(this.context.renderPass);
   }
 
   protected _getModel(): Model {
     const {numSegments} = this.props;
+    const {uniformStore} = this;
     let positions: number[] = [];
     /*
      *  (0, -1)-------------_(1, -1)
@@ -276,6 +282,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bindings: {picking: uniformStore.getManagedUniformBuffer(this.context.device, 'picking')},
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {

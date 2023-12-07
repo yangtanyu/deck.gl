@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME arc-layer-vertex-shader
 
 attribute vec3 positions;
@@ -184,10 +185,10 @@ void main(void) {
 
     vec3 currPos64Low = mix(instanceSourcePositions64Low, instanceTargetPositions64Low, segmentRatio);
     vec3 nextPos64Low = mix(instanceSourcePositions64Low, instanceTargetPositions64Low, nextSegmentRatio);
-  
+
     curr = project_position_to_clipspace(currPos, currPos64Low, vec3(0.0), geometry.position);
     next = project_position_to_clipspace(nextPos, nextPos64Low, vec3(0.0));
-  
+
   } else {
     vec3 source_world = instanceSourcePositions;
     vec3 target_world = instanceTargetPositions;
