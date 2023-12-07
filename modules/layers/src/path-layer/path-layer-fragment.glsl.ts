@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME path-layer-fragment-shader
 
 precision highp float;

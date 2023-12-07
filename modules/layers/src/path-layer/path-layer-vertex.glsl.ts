@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME path-layer-vertex-shader
 
 attribute vec2 positions;

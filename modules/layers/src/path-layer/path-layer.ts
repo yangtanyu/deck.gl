@@ -40,6 +40,8 @@ import type {
   DefaultProps
 } from '@deck.gl/core';
 import type {PathGeometry} from './path';
+import {UniformStore} from '@luma.gl/core';
+import {updatePickingUniformBindings} from '../utils';
 
 type _PathLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
@@ -149,6 +151,8 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     model?: Model;
     pathTesselator: PathTesselator;
   };
+
+  uniformStore = new UniformStore({picking});
 
   getShaders() {
     return super.getShaders({vs, fs, modules: [project32, picking]}); // 'project' module added by default.
@@ -330,6 +334,9 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       widthMinPixels,
       widthMaxPixels
     });
+
+    updatePickingUniformBindings(model, this.uniformStore);
+
     model.draw(this.context.renderPass);
   }
 
@@ -382,6 +389,9 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bindings: {
+        picking: this.uniformStore.getManagedUniformBuffer(this.context.device, 'picking')
+      },
       geometry: new Geometry({
         topology: 'triangle-list',
         attributes: {
