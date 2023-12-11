@@ -231,14 +231,16 @@ export async function fetchMap({
 
   // Periodically check if the data has changed. Note that this
   // will not update when a map is published.
+  let lastRequestTime: Date | undefined;
   let stopAutoRefresh: (() => void) | undefined;
   if (autoRefresh) {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     const intervalId = setInterval(async () => {
-      const changed = await fillInMapDatasets(map, clientId, apiBaseUrl, {
-        ...headers,
-        'If-Modified-Since': new Date().toUTCString()
-      });
+      const refreshHeaders = lastRequestTime
+        ? {...headers, 'If-Modified-Since': lastRequestTime.toUTCString()}
+        : headers;
+      const changed = await fillInMapDatasets(map, clientId, apiBaseUrl, refreshHeaders);
+      lastRequestTime = new Date();
       if (onNewData && changed.some(v => v === true)) {
         onNewData(parseMap(map));
       }
@@ -265,6 +267,7 @@ export async function fetchMap({
 
   // Mutates map.datasets so that dataset.data contains data
   await fillInMapDatasets(map, clientId, apiBaseUrl, headers);
+  lastRequestTime = new Date();
 
   // Mutates attributes in visualChannels to contain tile stats
   await fillInTileStats(map, apiBaseUrl);
