@@ -166,7 +166,8 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
-        topology: 'triangle-fan-webgl',
+      // TODO v9. was triangle-fan-webgl, update geometry
+      topology: 'triangle-strip',
         vertexCount: 4,
         attributes: {
           positions: {size: 2, value: new Float32Array(positions)}
