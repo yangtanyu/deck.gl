@@ -5,7 +5,13 @@ import {KeplerMapConfig} from '@deck.gl/carto/api/types';
 import {fetchBasemapProps} from '@deck.gl/carto';
 
 const mockedMapConfig: KeplerMapConfig = {
-  mapState: undefined,
+  mapState: {
+    latitude: 33.3232,
+    longitude: -122.0312,
+    zoom: 5,
+    pitch: 0,
+    bearing: 0
+  },
   mapStyle: {
     styleType: 'positron',
     visibleLayerGroups: {}
@@ -127,7 +133,14 @@ test('fetchBasemapProps#google', async t =>
         type: 'google-maps',
         options: {
           mapTypeId: 'roadmap',
-          mapId: '885caf1e15bb9ef2'
+          mapId: '885caf1e15bb9ef2',
+          center: {
+            lat: 33.3232,
+            lng: -122.0312
+          },
+          zoom: 6,
+          tilt: 0,
+          heading: 0
         }
       },
       'should return proper google map options'

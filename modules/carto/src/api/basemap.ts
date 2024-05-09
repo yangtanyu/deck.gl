@@ -112,9 +112,16 @@ export async function fetchBasemapProps({
   }
   const googleBasemapDef = GOOGLE_BASEMAPS[styleType];
   if (googleBasemapDef) {
+    const {mapState} = config;
     return {
       type: 'google-maps',
-      options: googleBasemapDef
+      options: {
+        ...googleBasemapDef,
+        center: {lat: mapState.latitude, lng: mapState.longitude},
+        zoom: mapState.zoom + 1,
+        tilt: mapState.pitch,
+        heading: mapState.bearing
+      }
     };
   }
   return {
