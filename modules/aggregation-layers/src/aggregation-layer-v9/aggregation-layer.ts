@@ -9,9 +9,7 @@ import {
 } from '@deck.gl/core';
 import {Aggregator} from './aggregator';
 import {GPUAggregator} from './gpu-aggregator/gpu-aggregator';
-
-// TODO
-type CPUAggregator = Aggregator;
+import {CPUAggregator} from './cpu-aggregator/cpu-aggregator';
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
   data: LayerDataSource<DataT>;
