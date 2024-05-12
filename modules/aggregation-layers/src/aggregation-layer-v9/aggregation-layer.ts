@@ -8,9 +8,8 @@ import {
   AttributeManager
 } from '@deck.gl/core';
 import {Aggregator} from './aggregator';
+import {GPUAggregator} from './gpu-aggregator/gpu-aggregator';
 
-// TODO
-type GPUAggregator = Aggregator & {destroy(): void};
 // TODO
 type CPUAggregator = Aggregator;
 
